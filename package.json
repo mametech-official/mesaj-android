@@ -1,0 +1,19 @@
+{
+  "name": "mesaj-android",
+  "version": "1.0.0",
+  "description": "Mesaj — Google Play Store (Android / Capacitor & Gradle) Resmi Mobil Uygulama Projesi",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync android",
+    "open": "cap open android",
+    "build:debug": "cd android && ./gradlew assembleDebug",
+    "build:aab": "cd android && ./gradlew bundleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

@@ -1,0 +1,74 @@
+name: Android APK & Google Play AAB Build
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Build Android APK & Play Store AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Depoyu İndir (Checkout)
+        uses: actions/checkout@v4
+
+      - name: Node.js Kurulumu
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Java JDK 21 Kurulumu
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Capacitor Bağımlılıklarını Kur ve Senkronize Et
+        run: |
+          npm install --no-audit --no-fund
+          npx cap sync android
+
+      - name: Gradle Çalıştırma İznini Ver
+        run: chmod +x android/gradlew
+
+      - name: Debug APK Üret (Test Kurulumu İçin)
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Release Keystore Oluştur ve Google Play AAB + İmzalı APK Üret
+        working-directory: android
+        run: |
+          keytool -genkeypair -v \
+            -keystore mesaj-release.keystore \
+            -alias mesaj-key \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass MesajStore2026! \
+            -keypass MesajStore2026! \
+            -dname "CN=MameTech Official, OU=Mobile, O=MameTech, L=Istanbul, S=Istanbul, C=TR"
+
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/mesaj-release.keystore \
+            -Pandroid.injected.signing.store.password=MesajStore2026! \
+            -Pandroid.injected.signing.key.alias=mesaj-key \
+            -Pandroid.injected.signing.key.password=MesajStore2026!
+
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/mesaj-release.keystore \
+            -Pandroid.injected.signing.store.password=MesajStore2026! \
+            -Pandroid.injected.signing.key.alias=mesaj-key \
+            -Pandroid.injected.signing.key.password=MesajStore2026!
+
+      - name: APK ve Google Play AAB Dosyalarını Yükle (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mesaj-Android-GooglePlay-Paketleri
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/mesaj-release.keystore
+          if-no-files-found: warn

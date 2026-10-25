@@ -1,0 +1,25 @@
+{
+  "appId": "com.mametech.mesaj",
+  "appName": "Mesaj",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "allowNavigation": [
+      "*.supabase.co",
+      "*.openstreetmap.org",
+      "*.google.com",
+      "*.jsdelivr.net"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": true,
+    "scrollEnabled": false
+  }
+}
