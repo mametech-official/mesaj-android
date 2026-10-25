@@ -31,6 +31,30 @@ public class MainActivity extends BridgeActivity {
             settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         }
 
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (bridge != null && bridge.getWebView() != null) {
+                    WebView webView = bridge.getWebView();
+                    webView.evaluateJavascript(
+                        "(function(){ return (window.__handleBackNavigation && window.__handleBackNavigation(true)) ? 'HANDLED' : 'ROOT'; })()",
+                        value -> {
+                            if (value != null && value.contains("HANDLED")) {
+                                return;
+                            }
+                            if (webView.canGoBack()) {
+                                webView.goBack();
+                            } else {
+                                moveTaskToBack(true);
+                            }
+                        }
+                    );
+                } else {
+                    moveTaskToBack(true);
+                }
+            }
+        });
+
         requestEssentialPermissions();
     }
 
